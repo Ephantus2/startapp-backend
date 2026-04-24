@@ -4,3 +4,4 @@ django-cors-headers
 pillow
 mysqlclient
 djangorestframework_simplejwt
+requests

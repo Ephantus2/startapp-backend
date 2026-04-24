@@ -18,7 +18,13 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         if not self.referral_code:
-            self.referral_code = str(uuid.uuid4()).replace('-', '')[:10].upper()
+            while True:
+                code = str(uuid.uuid4()).replace('-', '')[:10].upper()
+    
+                if not User.objects.filter(referral_code=code).exists():
+                    self.referral_code = code
+                    break
+    
         super().save(*args, **kwargs)
 
 
