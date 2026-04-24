@@ -1,3 +1,40 @@
-from django.db import models
+# accounts/models.py
 
-# Create your models here.
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+import uuid
+
+
+class User(AbstractUser):
+    referral_code = models.CharField(max_length=12, unique=True, blank=True)
+    referred_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='people_referred'
+    )
+    points = models.IntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            self.referral_code = str(uuid.uuid4()).replace('-', '')[:10].upper()
+        super().save(*args, **kwargs)
+
+
+class ReferralReward(models.Model):
+    referrer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='rewards_given'
+    )
+    new_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='rewards_received'
+    )
+    points = models.IntegerField(default=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.referrer.username} referred {self.new_user.username}"

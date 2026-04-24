@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import MpesaPayment
+from rest_framework.permissions import IsAuthenticated
 
 
 class STKPushView(APIView):
@@ -166,7 +167,7 @@ class MpesaCallbackView(APIView):
     """
 
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
 
