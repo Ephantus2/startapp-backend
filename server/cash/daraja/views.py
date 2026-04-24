@@ -48,11 +48,11 @@ class STKPushView(APIView):
 
             # 2️⃣ M-Pesa Config (Use environment variables in production)
             business_shortcode = "174379"
-            passkey = "YOUR_SANDBOX_PASSKEY"
-            consumer_key = "YOUR_SANDBOX_CONSUMER_KEY"
-            consumer_secret = "YOUR_SANDBOX_CONSUMER_SECRET"
+            passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+            consumer_key = "eSQFZduKSQDj680euPXR4huvjcpfYJkWsbAK6T4dOAVsTNA8"
+            consumer_secret = "pBPwGPOxtmB9fvu8vhc1Y4slVZAuG5ROgKPys9GrhKLcw9iGGcs77xpFJYLRM3nM"
 
-            callback_url = "https://your-ngrok-url/mpesa/callback/"
+            callback_url = "https://carmelia-hyperscholastic-uneugenically.ngrok-free.dev/mpesa/callback/"
 
             # 3️⃣ Generate Timestamp
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
