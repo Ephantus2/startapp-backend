@@ -1,37 +1,80 @@
+# accounts/views.py
+
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import UserSerializer
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializedData = UserSerializer(data = request.data)
-        if serializedData.is_valid():
-            serializedData.save()
-            return Response({'message': 'user created successfully, please login'}, status=status.HTTP_201_CREATED)
-        return Response(serializedData.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+from .serializers import UserSerializer
+from .models import User, ReferralReward
+
 
 def get_token_for_user(user):
     refresh = RefreshToken.for_user(user)
-    return({
+
+    return {
         'refresh': str(refresh),
         'access': str(refresh.access_token)
-    })
-    
+    }
+
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.save()
+
+            # reward referrer
+            if user.referred_by:
+                user.referred_by.points += 100
+                user.referred_by.save()
+
+                ReferralReward.objects.create(
+                    referrer=user.referred_by,
+                    new_user=user,
+                    points=100
+                )
+
+            return Response(
+                {
+                    'message': 'user created successfully',
+                    'referral_code': user.referral_code
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        
-        user =  authenticate(username=username, password=password)
-        
+
+        user = authenticate(
+            username=username,
+            password=password
+        )
+
         if user is not None:
             token = get_token_for_user(user)
-            response = Response({'message': 'logged in successfully', "user": user.id})
+
+            response = Response(
+                {
+                    'message': 'logged in successfully',
+                    'user_id': user.id,
+                    'referral_code': user.referral_code,
+                    'points': user.points,
+                    'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}"
+                }
+            )
+
             response.set_cookie(
                 key='access_token',
                 value=token['access'],
@@ -39,6 +82,7 @@ class LoginView(APIView):
                 samesite='None',
                 secure=True
             )
+
             response.set_cookie(
                 key='refresh_token',
                 value=token['refresh'],
@@ -46,14 +90,54 @@ class LoginView(APIView):
                 samesite='None',
                 secure=True
             )
+
             return response
-        else:
-            return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
+        return Response(
+            {'error': 'Invalid Credentials'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+
 class LogoutView(APIView):
     def post(self, request):
-        response = Response()
+        response = Response({'message': 'logged out'})
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
-        response.data = {'message': 'logged out'}
         return response
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'points': user.points,
+            'referral_code': user.referral_code,
+            'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}"
+        })
+
+
+class ReferralHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        rewards = ReferralReward.objects.filter(
+            referrer=request.user
+        ).order_by('-created_at')
+
+        data = []
+
+        for item in rewards:
+            data.append({
+                'new_user': item.new_user.username,
+                'points': item.points,
+                'date': item.created_at
+            })
+
+        return Response(data)
