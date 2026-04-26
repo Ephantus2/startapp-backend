@@ -69,6 +69,9 @@ class LoginView(APIView):
                 {
                     'message': 'logged in successfully',
                     'user_id': user.id,
+                    'user_name': user.username,
+                    'date_joined': user.date_joined,
+                    'email': user.email,
                     'referral_code': user.referral_code,
                     'points': user.points,
                     'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}"
