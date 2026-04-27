@@ -82,16 +82,16 @@ class LoginView(APIView):
                 key='access_token',
                 value=token['access'],
                 httponly=True,
-                samesite='None',
-                secure=True
+                samesite='Lax',
+                secure=False
             )
 
             response.set_cookie(
                 key='refresh_token',
                 value=token['refresh'],
                 httponly=True,
-                samesite='None',
-                secure=True
+                samesite='Lax',
+                secure=False
             )
 
             return response
