@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ReferralSerializer
 from .models import User, ReferralReward
 
 
@@ -144,3 +144,21 @@ class ReferralHistoryView(APIView):
             })
 
         return Response(data)
+    
+class MyReferralsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        referrals = request.user.people_referred.all()
+        print(referrals)
+
+        serializer = ReferralSerializer(
+            referrals,
+            many=True
+        )
+
+        return Response({
+            "total_referrals": referrals.count(),
+            "total_points": request.user.points,
+            "referrals": serializer.data
+        })
