@@ -44,3 +44,12 @@ class ReferralReward(models.Model):
 
     def __str__(self):
         return f"{self.referrer.username} referred {self.new_user.username}"
+    
+class Wallet(models.Model):
+    balance = models.IntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+class Activate(models.Model):
+    activated = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -13,8 +13,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+
 from .models import MpesaPayment
 from rest_framework.permissions import IsAuthenticated
+from accounts.models import Wallet
+from accounts.models import Activate
 
 
 class STKPushView(APIView):
@@ -41,9 +44,9 @@ class STKPushView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            if int(amount) <= 0:
+            if int(amount) < 500:
                 return Response(
-                    {"error": "Amount must be greater than 0"},
+                    {"error": "Amount must be greater than 500"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -202,9 +205,13 @@ class MpesaCallbackView(APIView):
                     result_code=result_code,
                     result_desc=result_desc
                 )
+                
+                Wallet.balance += amount
 
             return Response(
-                {"message": "Callback received"},
+                {"message": "Callback received",
+                 "status": "Activated"
+                 },
                 status=status.HTTP_200_OK
             )
 
