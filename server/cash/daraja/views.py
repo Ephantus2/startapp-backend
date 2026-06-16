@@ -238,6 +238,7 @@ class MpesaCallbackView(APIView):
                 if hasattr(user, "referred_by") and user.referred_by:
                     ref = user.referred_by
                     ref.user_wallet += 200
+                    ref.from_referrals += 200
                     ref.save()
                     print("hello from jeff")
             return Response(

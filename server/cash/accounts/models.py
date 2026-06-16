@@ -16,6 +16,7 @@ class User(AbstractUser):
     )
     points = models.IntegerField(default=0)
     user_wallet = models.IntegerField(default=0)
+    from_referrals = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
         if not self.referral_code:
