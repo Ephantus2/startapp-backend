@@ -233,12 +233,14 @@ class MpesaCallbackView(APIView):
             
                 # 💰 wallet update
                 user.user_wallet += 500
+                user.life_term_earning += 500
                 user.save()
             
                 if hasattr(user, "referred_by") and user.referred_by:
                     ref = user.referred_by
                     ref.user_wallet += 200
                     ref.from_referrals += 200
+                    ref.life_term_earning += 200
                     ref.save()
                     print("hello from jeff")
             return Response(

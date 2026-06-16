@@ -78,7 +78,8 @@ class LoginView(APIView):
                     'points': user.points,
                     'user_wallet': user.user_wallet,
                     'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}",
-                    'from_referrals': user.from_referrals
+                    'from_referrals': user.from_referrals,
+                    'life_term_earning': user.life_term_earning
                 }
             )
 
