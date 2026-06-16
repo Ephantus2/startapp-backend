@@ -15,9 +15,11 @@ from rest_framework import status
 
 
 from .models import MpesaPayment
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.models import Wallet
 from accounts.models import Activate
+
+from django.contrib.auth.models import User
 
 
 class STKPushView(APIView):
@@ -44,7 +46,7 @@ class STKPushView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            if int(amount) < 500:
+            if int(amount) < 2:
                 return Response(
                     {"error": "Amount must be greater than 500"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -126,6 +128,15 @@ class STKPushView(APIView):
                 )
 
             response_data = response.json()
+            
+            checkout_id = response_data.get("CheckoutRequestID")
+
+            MpesaPayment.objects.create(
+                user=request.user,   # IMPORTANT
+                checkout_id=checkout_id,
+                amount=amount,
+                status="pending"
+            )
 
             # 7️⃣ Handle Daraja Immediate Errors
             if response_data.get("ResponseCode") != "0":
@@ -151,9 +162,17 @@ class STKPushView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        except ValueError:
+        except ValueError as e:
+            import traceback
+
+            print("VALUE ERROR:", str(e))
+            traceback.print_exc()
+
             return Response(
-                {"error": "Invalid amount format"},
+                {
+                    "error": "ValueError",
+                    "details": str(e)
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -170,7 +189,7 @@ class MpesaCallbackView(APIView):
     """
 
     authentication_classes = []
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
 
@@ -196,18 +215,31 @@ class MpesaCallbackView(APIView):
             trans_date = metadata_dict.get("TransactionDate")
 
             if result_code == 0:
-                MpesaPayment.objects.create(
-                    amount=amount,
-                    receipt=receipt,
-                    phone=phone,
-                    date=trans_date,
-                    checkout_id=checkout_id,
-                    result_code=result_code,
-                    result_desc=result_desc
-                )
-                
-                Wallet.balance += amount
 
+                payment = MpesaPayment.objects.get(
+                    checkout_id=checkout_id
+                )
+            
+                user = payment.user
+            
+                payment.amount = amount
+                payment.receipt = receipt
+                payment.phone = phone
+                payment.result_code = result_code
+                payment.result_desc = result_desc
+                payment.status = "completed"
+                payment.save()
+                print("hello from callback")
+            
+                # 💰 wallet update
+                user.user_wallet += 500
+                user.save()
+            
+                if hasattr(user, "referred_by") and user.referred_by:
+                    ref = user.referred_by
+                    ref.user_wallet += 200
+                    ref.save()
+                    print("hello from jeff")
             return Response(
                 {"message": "Callback received",
                  "status": "Activated"

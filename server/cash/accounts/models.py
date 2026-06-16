@@ -15,6 +15,7 @@ class User(AbstractUser):
         related_name='people_referred'
     )
     points = models.IntegerField(default=0)
+    user_wallet = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
         if not self.referral_code:
@@ -26,6 +27,9 @@ class User(AbstractUser):
                     break
     
         super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"username: {self.username}, email: {self.email}"
 
 
 class ReferralReward(models.Model):
@@ -40,6 +44,7 @@ class ReferralReward(models.Model):
         related_name='rewards_received'
     )
     points = models.IntegerField(default=100)
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

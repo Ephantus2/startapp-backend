@@ -8,7 +8,8 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer, ReferralSerializer
-from .models import User, ReferralReward
+from .models import User, ReferralReward, Wallet
+
 
 
 def get_token_for_user(user):
@@ -30,6 +31,7 @@ class RegisterView(APIView):
             # reward referrer
             if user.referred_by:
                 user.referred_by.points += 100
+                user.referred_by.user_wallet += 200
                 user.referred_by.save()
 
                 ReferralReward.objects.create(
@@ -74,6 +76,7 @@ class LoginView(APIView):
                     'email': user.email,
                     'referral_code': user.referral_code,
                     'points': user.points,
+                    'user_wallet': user.user_wallet,
                     'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}"
                 }
             )
@@ -155,7 +158,7 @@ class MyReferralsView(APIView):
         serializer = ReferralSerializer(
             referrals,
             many=True
-        )
+        ) 
 
         return Response({
             "total_referrals": referrals.count(),

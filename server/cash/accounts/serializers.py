@@ -25,12 +25,14 @@ class UserSerializer(serializers.ModelSerializer):
             'password',
             'referral_code',
             'points',
+            'user_wallet',
             'referred_by_code'
         ]
         read_only_fields = [
             'id',
             'referral_code',
-            'points'
+            'points',
+            'user_wallet'
         ]
 
     # username validation
