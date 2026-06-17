@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,3 +151,20 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 ALLOWED_HOSTS = ["*"]
+
+
+MPESA_CONSUMER_KEY = os.getenv("MPESA_CONSUMER_KEY")
+MPESA_CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET")
+
+MPESA_INITIATOR_NAME = os.getenv("MPESA_INITIATOR_NAME")
+MPESA_SECURITY_CREDENTIAL = os.getenv("MPESA_SECURITY_CREDENTIAL")
+
+MPESA_SHORTCODE = "174379"
+
+MPESA_TIMEOUT_URL = (
+    "https://carmelia-hyperscholastic-uneugenically.ngrok-free.dev/mpesa/b2c-timeout/"
+)
+
+MPESA_B2C_CALLBACK_URL = (
+    "https://carmelia-hyperscholastic-uneugenically.ngrok-free.dev/mpesa//b2c-callback/"
+)

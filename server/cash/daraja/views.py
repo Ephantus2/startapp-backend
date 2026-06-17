@@ -255,3 +255,170 @@ class MpesaCallbackView(APIView):
                 {"error": "Callback processing failed", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+            
+import base64
+import requests
+
+from django.conf import settings
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import status
+
+from .models import Withdrawal, B2CCallbackLog
+
+def get_access_token():
+
+    consumer_key = settings.MPESA_CONSUMER_KEY
+    consumer_secret = settings.MPESA_CONSUMER_SECRET
+
+    auth_string = f"{consumer_key}:{consumer_secret}"
+
+    encoded_auth = base64.b64encode(
+        auth_string.encode()
+    ).decode()
+
+    token_url = (
+        "https://sandbox.safaricom.co.ke/"
+        "oauth/v1/generate?grant_type=client_credentials"
+    )
+
+    headers = {
+        "Authorization": f"Basic {encoded_auth}"
+    }
+
+    response = requests.get(
+        token_url,
+        headers=headers
+    )
+
+    return response.json()["access_token"]
+
+class WithdrawView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        amount = int(request.data.get("amount"))
+        phone = request.data.get("phone")
+
+        user = request.user
+
+        if amount < 100:
+            return Response(
+                {"error": "Minimum withdrawal is 100"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user.user_wallet < amount:
+            return Response(
+                {"error": "Insufficient balance"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        withdrawal = Withdrawal.objects.create(
+            user=user,
+            amount=amount,
+            phone_number=phone,
+            status="pending"
+        )
+
+        access_token = get_access_token()
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "InitiatorName": settings.MPESA_INITIATOR_NAME,
+            "SecurityCredential": settings.MPESA_SECURITY_CREDENTIAL,
+            "CommandID": "BusinessPayment",
+            "Amount": amount,
+            "PartyA": settings.MPESA_SHORTCODE,
+            "PartyB": phone,
+            "Remarks": "Withdrawal",
+            "QueueTimeOutURL":
+                settings.MPESA_TIMEOUT_URL,
+            "ResultURL":
+                settings.MPESA_B2C_CALLBACK_URL,
+            "Occasion": "Withdrawal"
+        }
+
+        response = requests.post(
+            "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest",
+            json=payload,
+            headers=headers
+        )
+
+        data = response.json()
+
+        withdrawal.conversation_id = data.get(
+            "ConversationID"
+        )
+
+        withdrawal.originator_conversation_id = data.get(
+            "OriginatorConversationID"
+        )
+
+        withdrawal.save()
+
+        return Response({
+            "message": "Withdrawal submitted",
+            "data": data
+        })
+        
+
+class B2CCallbackView(APIView):
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        try:
+
+            result = request.data.get("Result", {})
+
+            result_code = result.get("ResultCode")
+
+            conversation_id = result.get(
+                "ConversationID"
+            )
+
+            withdrawal = Withdrawal.objects.get(
+                conversation_id=conversation_id
+            )
+
+            if result_code == 0:
+
+                user = withdrawal.user
+
+                user.user_wallet -= withdrawal.amount
+                user.save()
+                B2CCallbackLog.objects.create(
+                payload=request.data
+                )
+
+                withdrawal.status = "completed"
+
+            else:
+
+                withdrawal.status = "failed"
+
+            withdrawal.save()
+
+            return Response({
+                "message": "Callback received"
+            })
+
+        except Exception as e:
+
+            return Response(
+                {"error": str(e)},
+                status=500
+            )
+
