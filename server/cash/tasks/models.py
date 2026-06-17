@@ -11,6 +11,7 @@ class Task(models.Model):
         ('website_visit', 'Visit Website'),
         ('quiz', 'Quiz'),
         ('daily_login', 'Daily Login'),
+        ('click_add', 'Click Add')
     )
 
     title = models.CharField(max_length=200)
