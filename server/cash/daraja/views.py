@@ -16,10 +16,11 @@ from rest_framework import status
 
 from .models import MpesaPayment
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from accounts.models import Wallet
-from accounts.models import Activate
+
+from accounts.models import Activate, Transactions
 
 from django.contrib.auth.models import User
+
 
 
 class STKPushView(APIView):
@@ -213,6 +214,8 @@ class MpesaCallbackView(APIView):
             receipt = metadata_dict.get("MpesaReceiptNumber")
             phone = metadata_dict.get("PhoneNumber")
             trans_date = metadata_dict.get("TransactionDate")
+            
+            
 
             if result_code == 0:
 
@@ -242,7 +245,23 @@ class MpesaCallbackView(APIView):
                     ref.from_referrals += 200
                     ref.life_term_earning += 200
                     ref.save()
+                    
+                    Transactions.objects.create(
+                    user=user.referred_by,
+                    description = f"Referral Bonus: {user}",
+                    task_type = "referral",
+                    amount = 200,
+                    status = 'completed'
+                    )
                     print("hello from jeff")
+                    
+                Transactions.objects.create(
+                    user=user,
+                    description = f"deposited ksh {amount}",
+                    task_type = "deposit",
+                    amount = amount,
+                    status = 'completed'
+                )
             return Response(
                 {"message": "Callback received",
                  "status": "Activated"
@@ -432,6 +451,13 @@ class B2CCallbackView(APIView):
                 )
 
                 withdrawal.status = "completed"
+                Transactions.objects.create(
+                    user=withdrawal.user,
+                    description = f"deposited ksh {withdrawal.amount} to {withdrawal.phone_number}",
+                    task_type = "withdraw",
+                    amount = withdrawal.amount,
+                    status = 'completed'
+                )
 
             else:
 

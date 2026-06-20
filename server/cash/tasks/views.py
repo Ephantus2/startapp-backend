@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Task, CompletedTask
-from .serializers import TaskSerializer, CompletedSerializer
+from .serializers import TaskSerializer, CompletedSerializer, TransactionSerializer
+from accounts.models import Transactions
 
 class TaskListView(APIView):
 
@@ -55,6 +56,13 @@ class CompleteTaskView(APIView):
             user=request.user,
             task=task
         )
+        Transactions.objects.create(
+            user=request.user,
+            description = task.title,
+            task_type = "task",
+            amount = task.reward_points,
+            status = 'completed'
+                )
 
         request.user.points += task.reward_points
         request.user.user_wallet += task.reward_points
@@ -76,3 +84,14 @@ class CompleteTaskView(APIView):
         
         return Response(serializers.data, status=status.HTTP_200_OK)
     
+    
+class TransactionsView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        
+        user = request.user
+        transactions = Transactions.objects.filter(user=user)
+        serializers = TransactionSerializer(transactions, many=True)
+        
+        return Response(serializers.data, status=status.HTTP_200_OK)
+        
