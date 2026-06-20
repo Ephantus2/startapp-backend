@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Task, CompletedTask
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, CompletedSerializer
 
 class TaskListView(APIView):
 
@@ -57,10 +57,22 @@ class CompleteTaskView(APIView):
         )
 
         request.user.points += task.reward_points
+        request.user.user_wallet += task.reward_points
         request.user.save()
+        
 
         return Response({
             "message": "Task completed",
             "earned_points": task.reward_points,
-            "total_points": request.user.points
+            "total_points": request.user.points,
         })
+    
+    def get(self, request):
+        
+        user = request.user
+        completed = CompletedTask.objects.filter(user=user)
+        
+        serializers = CompletedSerializer(completed, many=True)
+        
+        return Response(serializers.data, status=status.HTTP_200_OK)
+    

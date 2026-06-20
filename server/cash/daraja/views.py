@@ -301,6 +301,9 @@ class WithdrawView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        
+        print("RESULT URL:", settings.MPESA_B2C_CALLBACK_URL)
+        print("TIMEOUT URL:", settings.MPESA_TIMEOUT_URL)
 
         amount = int(request.data.get("amount"))
         phone = request.data.get("phone")
@@ -334,18 +337,36 @@ class WithdrawView(APIView):
         }
 
         payload = {
-            "InitiatorName": settings.MPESA_INITIATOR_NAME,
-            "SecurityCredential": settings.MPESA_SECURITY_CREDENTIAL,
-            "CommandID": "BusinessPayment",
-            "Amount": amount,
-            "PartyA": settings.MPESA_SHORTCODE,
+
+           "InitiatorName":
+                settings.MPESA_INITIATOR_NAME,
+        
+            "SecurityCredential":
+                settings.MPESA_SECURITY_CREDENTIAL,
+        
+            "CommandID":
+                "BusinessPayment",
+        
+            "Amount":
+                amount,
+        
+            "PartyA":
+                settings.MPESA_B2C_SHORTCODE,
+        
             "PartyB": phone,
-            "Remarks": "Withdrawal",
+                #settings.MPESA_B2C_PARTY_B,
+        
+            "Remarks":
+                "Withdrawal",
+        
             "QueueTimeOutURL":
                 settings.MPESA_TIMEOUT_URL,
+        
             "ResultURL":
                 settings.MPESA_B2C_CALLBACK_URL,
-            "Occasion": "Withdrawal"
+        
+            "Occasion":
+                "Withdrawal"
         }
 
         response = requests.post(
@@ -353,6 +374,9 @@ class WithdrawView(APIView):
             json=payload,
             headers=headers
         )
+        
+        print("STATUS:", response.status_code)
+        print("RESPONSE:", response.text)
 
         data = response.json()
 
@@ -378,6 +402,10 @@ class B2CCallbackView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        
+        print("========== B2C CALLBACK ==========")
+        print(request.data)
+
 
         try:
 

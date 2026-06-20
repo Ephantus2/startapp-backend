@@ -153,18 +153,45 @@ CORS_ALLOWED_ORIGINS = [
 ALLOWED_HOSTS = ["*"]
 
 
+
 MPESA_CONSUMER_KEY = os.getenv("MPESA_CONSUMER_KEY")
 MPESA_CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET")
 
-MPESA_INITIATOR_NAME = os.getenv("MPESA_INITIATOR_NAME")
-MPESA_SECURITY_CREDENTIAL = os.getenv("MPESA_SECURITY_CREDENTIAL")
 
-MPESA_SHORTCODE = "174379"
-
-MPESA_TIMEOUT_URL = (
-    "https://carmelia-hyperscholastic-uneugenically.ngrok-free.dev/mpesa/b2c-timeout/"
+# STK
+MPESA_STK_SHORTCODE = os.getenv(
+    "MPESA_STK_SHORTCODE"
 )
 
-MPESA_B2C_CALLBACK_URL = (
-    "https://carmelia-hyperscholastic-uneugenically.ngrok-free.dev/mpesa//b2c-callback/"
+MPESA_PASSKEY = os.getenv(
+    "MPESA_PASSKEY"
+)
+
+
+# B2C
+MPESA_B2C_SHORTCODE = os.getenv(
+    "MPESA_B2C_SHORTCODE"
+)
+
+MPESA_INITIATOR_NAME = os.getenv(
+    "MPESA_INITIATOR_NAME"
+)
+
+MPESA_INITIATOR_PASSWORD = os.getenv(
+    "MPESA_INITIATOR_PASSWORD"
+)
+
+MPESA_B2C_PARTY_B = os.getenv(
+    "MPESA_B2C_PARTY_B"
+)
+MPESA_SECURITY_CREDENTIAL = os.getenv(
+    "MPESA_SECURITY_CREDENTIAL"
+)
+
+MPESA_TIMEOUT_URL = os.getenv(
+    "MPESA_TIMEOUT_URL"
+)
+
+MPESA_B2C_CALLBACK_URL = os.getenv(
+    "MPESA_B2C_CALLBACK_URL"
 )
