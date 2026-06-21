@@ -176,7 +176,7 @@ class UpdateProfile(APIView):
     
     def put(self, request, pk):
         try:
-            user = User.objects.get(id=pk)
+            user = User.objects.get(id=request.user)
         except User.DoesNotExist():
             return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -198,3 +198,13 @@ class UpdateProfile(APIView):
             user.email = email
             user.save()
         return Response({'message': 'profile updated'}, status=status.HTTP_200_OK)
+    
+    def delete(self, request, pk):
+        try:
+            print(request.user)
+            user = User.objects.get(email=request.user.email)
+        except User.DoesNotExist():
+            return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+        user.delete()
+        return Response({'message': 'user deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
