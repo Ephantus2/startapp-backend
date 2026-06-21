@@ -26,7 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
             'referral_code',
             'points',
             'user_wallet',
-            'referred_by_code'
+            'referred_by_code',
+            'phone_number'
         ]
         read_only_fields = [
             'id',

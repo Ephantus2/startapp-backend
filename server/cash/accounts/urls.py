@@ -10,4 +10,5 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view()),
     path('referrals/', views.ReferralHistoryView.as_view()),
     path('myreferrals/', views.MyReferralsView.as_view()),
+    path('update/<int:pk>/', views.UpdateProfile.as_view())
 ]

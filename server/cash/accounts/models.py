@@ -20,6 +20,7 @@ class User(AbstractUser):
     user_wallet = models.IntegerField(default=0)
     from_referrals = models.IntegerField(default=0)
     life_time_earning = models.IntegerField(default=0)
+    phone_number = models.CharField(default=None, max_length=15)
     
 
     def save(self, *args, **kwargs):

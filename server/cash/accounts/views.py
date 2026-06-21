@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer, ReferralSerializer
 from .models import User, ReferralReward, Wallet
+from rest_framework import generics
 
 
 
@@ -77,9 +78,10 @@ class LoginView(APIView):
                     'referral_code': user.referral_code,
                     'points': user.points,
                     'user_wallet': user.user_wallet,
-                    'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}",
+                    'referral_link': f"http://localhost:8080/register?ref={user.referral_code}",
                     'from_referrals': user.from_referrals,
-                    'life_term_earning': user.life_time_earning
+                    'life_term_earning': user.life_time_earning,
+                    'phone_number': user.phone_number
                 }
             )
 
@@ -127,7 +129,7 @@ class ProfileView(APIView):
             'email': user.email,
             'points': user.points,
             'referral_code': user.referral_code,
-            'referral_link': f"http://127.0.0.1:8000/accounts/register/?ref={user.referral_code}"
+            'referral_link': f"http://localhost:8080/register?ref={user.referral_code}"
         })
 
 
@@ -167,3 +169,32 @@ class MyReferralsView(APIView):
             "total_points": request.user.points,
             "referrals": serializer.data
         })
+        
+
+class UpdateProfile(APIView):
+    permission_classes=[IsAuthenticated]
+    
+    def put(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+        except User.DoesNotExist():
+            return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        phone = request.data.get('phoneNumber')
+        
+        if username:
+            user.username = username
+            user.save()
+        if password:
+            user.password = password
+            user.save()
+        if phone:
+            user.phone_number = phone
+            user.save()
+        if email:
+            user.email = email
+            user.save()
+        return Response({'message': 'profile updated'}, status=status.HTTP_200_OK)
