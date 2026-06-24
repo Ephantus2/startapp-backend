@@ -184,14 +184,14 @@ class MyReferralsView(APIView):
             "referrals": serializer.data
         })
         
-
+from django.contrib.auth import update_session_auth_hash
 class UpdateProfile(APIView):
     permission_classes=[IsAuthenticated]
     
     def put(self, request, pk):
         try:
-            user = User.objects.get(id=request.user)
-        except User.DoesNotExist():
+            user = User.objects.get(id=request.user.id)
+        except User.DoesNotExist:
             return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
         
         username = request.data.get('username')
@@ -209,7 +209,7 @@ class UpdateProfile(APIView):
                 user=user
             )           
         if password:
-            user.password = password
+            user.set_password(password)
             user.save()
             Notifications.objects.create(
                 title="Profile Updated",
@@ -217,6 +217,7 @@ class UpdateProfile(APIView):
                 description=f"""Password updated""",
                 user=user
             )  
+            update_session_auth_hash(request, user)
         if phone:
             user.phone_number = phone
             user.save()
