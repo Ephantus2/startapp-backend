@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserSerializer, ReferralSerializer
+from .serializers import UserSerializer, ReferralSerializer, NotificationSerializer
 from .models import User, ReferralReward, Wallet, Activate, Notifications
 from rest_framework import generics
 
@@ -240,3 +240,9 @@ class UpdateProfile(APIView):
         
         user.delete()
         return Response({'message': 'user deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    
+class NotificationsView(APIView):
+    def get(self, request):
+        Notification = Notifications.objects.filter(user=request.user)
+        serializers = NotificationSerializer(Notification, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)

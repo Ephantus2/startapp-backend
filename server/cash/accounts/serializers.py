@@ -1,7 +1,7 @@
 # accounts/serializers.py
 
 from rest_framework import serializers
-from .models import User
+from .models import User, Notifications
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -112,3 +112,9 @@ class ReferralSerializer(serializers.ModelSerializer):
             'email',
             'date_joined'
         ]
+        
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Notifications
+        fields='__all__'
