@@ -66,6 +66,7 @@ class CompleteTaskView(APIView):
                 )
         Notifications.objects.create(
             title="Task Completed",
+            notif_types="task",
             description=f"""You earned {task.reward_points} from {task.title}""",
             user=request.user
         )  

@@ -42,12 +42,14 @@ class RegisterView(APIView):
                 )
                 Notifications.objects.create(
                     title="Referral Joined",
+                    notif_types="referral",
                     description=f"""{user} joined. You'll earn KES 200 once they are activated""",
                     user=user
                 )  
             
             Notifications.objects.create(
                 title="Welcome to EarnKE",
+                notif_types="system",
                 description="Activate account and Complete your first task to start earning today!",
                 user=user
             )
@@ -202,6 +204,7 @@ class UpdateProfile(APIView):
             user.save()
             Notifications.objects.create(
                 title="Profile Updated",
+                notif_types="system",
                 description=f"""Username updated to {username}""",
                 user=user
             )           
@@ -210,6 +213,7 @@ class UpdateProfile(APIView):
             user.save()
             Notifications.objects.create(
                 title="Profile Updated",
+                notif_types="system",
                 description=f"""Password updated""",
                 user=user
             )  
@@ -218,6 +222,7 @@ class UpdateProfile(APIView):
             user.save()
             Notifications.objects.create(
                 title="Profile Updated",
+                notif_types="system",
                 description=f"""Phone number updated to {phone}""",
                 user=user
             )  
@@ -226,6 +231,7 @@ class UpdateProfile(APIView):
             user.save()
             Notifications.objects.create(
                 title="Profile Updated",
+                notif_types="system",
                 description=f"""Email updated to {email}""",
                 user=user
             )  

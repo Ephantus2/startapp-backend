@@ -256,6 +256,7 @@ class MpesaCallbackView(APIView):
     
                     Notifications.objects.create(
                         title="Referral Activated",
+                        notif_types="referral",
                         description=f"""{user} Activate. KES {200} deposited to your account""",
                         user=user.referred_by
                     )  
@@ -270,6 +271,7 @@ class MpesaCallbackView(APIView):
                 
             Notifications.objects.create(
                 title="Account activated",
+                notif_types="system",
                 description=f"""Account Activeted. Explore tasks and invite friends to earn!""",
                 user=user
             )  
@@ -499,6 +501,7 @@ class B2CCallbackView(APIView):
                 )
                 Notifications.objects.create(
                     title="Withdrawal Approved",
+                    notif_types="withdrawal",
                     description=f"""KSH {withdrawal.amount} sent to {withdrawal.phone_number}""",
                     user=user
                 )  

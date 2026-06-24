@@ -102,7 +102,19 @@ class Activate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
 class Notifications(models.Model):
+    NOTIF_TYPES = (
+        ('task', 'task'),
+        ('referral', 'referral'),
+        ('withdrawal', 'withdrawal'),
+        ('system', 'system')
+    )
+
+    notif_types = models.CharField(
+        max_length=30,
+        choices=NOTIF_TYPES
+    )
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=500)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
