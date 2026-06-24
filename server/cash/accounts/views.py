@@ -252,3 +252,8 @@ class NotificationsView(APIView):
         Notification = Notifications.objects.filter(user=request.user)
         serializers = NotificationSerializer(Notification, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        Notification =  Notifications.objects.filter(user=request.user)
+        Notification.update(read=True)
+        

@@ -111,7 +111,8 @@ class Notifications(models.Model):
 
     notif_types = models.CharField(
         max_length=30,
-        choices=NOTIF_TYPES
+        choices=NOTIF_TYPES,
+        default='system'
     )
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=500)
