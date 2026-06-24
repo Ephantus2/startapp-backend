@@ -39,10 +39,11 @@ class Withdrawal(models.Model):
     phone_number = models.CharField(max_length=15)
 
     conversation_id = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
+    max_length=100,
+    unique=True,
+    null=True,
+    blank=True
+)
 
     originator_conversation_id = models.CharField(
         max_length=100,

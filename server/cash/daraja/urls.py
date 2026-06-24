@@ -7,7 +7,8 @@ from django.urls import path
 
 from .views import (
     WithdrawView,
-    B2CCallbackView
+    B2CCallbackView,
+    B2CTimeoutView
 )
 
 
@@ -23,5 +24,9 @@ urlpatterns = [
     path(
         'b2c-callback/',
         B2CCallbackView.as_view()
+    ),
+    path(
+        "b2c-timeout/",
+        B2CTimeoutView.as_view()
     ),
 ]

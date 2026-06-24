@@ -93,5 +93,4 @@ class TransactionsView(APIView):
         transactions = Transactions.objects.filter(user=user)
         serializers = TransactionSerializer(transactions, many=True)
         
-        return Response(serializers.data, status=status.HTTP_200_OK)
-        
+        return Response(serializers.data, status=status.HTTP_200_OK)     

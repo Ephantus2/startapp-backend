@@ -328,6 +328,7 @@ class WithdrawView(APIView):
         phone = request.data.get("phone")
 
         user = request.user
+        print(phone, amount)
 
         if amount < 100:
             return Response(
@@ -369,10 +370,10 @@ class WithdrawView(APIView):
             "Amount":
                 amount,
         
-            "PartyA":
-                settings.MPESA_B2C_SHORTCODE,
+            "PartyA": "600986",
+                #settings.MPESA_B2C_SHORTCODE,
         
-            "PartyB": phone,
+            "PartyB": "600000",
                 #settings.MPESA_B2C_PARTY_B,
         
             "Remarks":
@@ -398,6 +399,7 @@ class WithdrawView(APIView):
         print("RESPONSE:", response.text)
 
         data = response.json()
+        print("FULL RESPONSE:", response.json())
 
         withdrawal.conversation_id = data.get(
             "ConversationID"
@@ -416,63 +418,100 @@ class WithdrawView(APIView):
         
 
 class B2CCallbackView(APIView):
-
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
-        
-        print("========== B2C CALLBACK ==========")
+        print("\n" + "=" * 50)
+        print("B2C CALLBACK HIT")
         print(request.data)
-
+        print("=" * 50 + "\n")
 
         try:
-
+            # Safaricom payload structure
             result = request.data.get("Result", {})
 
             result_code = result.get("ResultCode")
+            conversation_id = result.get("ConversationID")
 
-            conversation_id = result.get(
-                "ConversationID"
-            )
+            print("ConversationID:", conversation_id)
+            print("ResultCode:", result_code)
 
-            withdrawal = Withdrawal.objects.get(
+            if not conversation_id:
+                return Response(
+                    {"error": "Missing ConversationID"},
+                    status=400
+                )
+
+            # FIX 1: safe lookup (prevents crash)
+            withdrawal = Withdrawal.objects.filter(
                 conversation_id=conversation_id
-            )
+            ).first()
 
+            if not withdrawal:
+                print("No matching withdrawal found for:", conversation_id)
+
+                return Response(
+                    {"error": "Withdrawal not found"},
+                    status=404
+                )
+
+            # FIX 2: prevent double processing (idempotency)
+            if withdrawal.status == "completed":
+                return Response({
+                    "message": "Already processed"
+                })
+
+            # SUCCESS
             if result_code == 0:
 
                 user = withdrawal.user
 
+                # update wallet
                 user.user_wallet -= withdrawal.amount
                 user.save()
+
+                # log callback safely
                 B2CCallbackLog.objects.create(
-                payload=request.data
+                    payload=request.data
                 )
 
+                # update withdrawal
                 withdrawal.status = "completed"
+
                 Transactions.objects.create(
                     user=withdrawal.user,
-                    description = f"deposited ksh {withdrawal.amount} to {withdrawal.phone_number}",
-                    task_type = "withdraw",
-                    amount = withdrawal.amount,
-                    status = 'completed'
+                    description=f"Withdrawn KES {withdrawal.amount} to {withdrawal.phone_number}",
+                    task_type="withdraw",
+                    amount=withdrawal.amount,
+                    status="completed"
                 )
 
             else:
-
                 withdrawal.status = "failed"
 
             withdrawal.save()
 
             return Response({
-                "message": "Callback received"
+                "message": "Callback processed successfully"
             })
 
         except Exception as e:
+            print("B2C CALLBACK ERROR:", str(e))
 
             return Response(
                 {"error": str(e)},
                 status=500
             )
 
+class B2CTimeoutView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        print("========== B2C TIMEOUT ==========")
+        print(request.data)
+
+        return Response({
+            "message": "Timeout received"
+        })
