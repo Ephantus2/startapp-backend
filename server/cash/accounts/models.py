@@ -100,3 +100,9 @@ class Wallet(models.Model):
 class Activate(models.Model):
     activated = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+class Notifications(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.CharField(max_length=500)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)

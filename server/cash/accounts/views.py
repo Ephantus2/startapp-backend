@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer, ReferralSerializer
-from .models import User, ReferralReward, Wallet
+from .models import User, ReferralReward, Wallet, Activate, Notifications
 from rest_framework import generics
 
 
@@ -40,6 +40,18 @@ class RegisterView(APIView):
                     new_user=user,
                     points=100
                 )
+                Notifications.objects.create(
+                    title="Referral Joined",
+                    description=f"""{user} joined. You'll earn KES 200 once they are activated""",
+                    user=user
+                )  
+            
+            Notifications.objects.create(
+                title="Welcome to EarnKE",
+                description="Activate account and Complete your first task to start earning today!",
+                user=user
+            )
+            
 
             return Response(
                 {
@@ -188,15 +200,35 @@ class UpdateProfile(APIView):
         if username:
             user.username = username
             user.save()
+            Notifications.objects.create(
+                title="Profile Updated",
+                description=f"""Username updated to {username}""",
+                user=user
+            )           
         if password:
             user.password = password
             user.save()
+            Notifications.objects.create(
+                title="Profile Updated",
+                description=f"""Password updated""",
+                user=user
+            )  
         if phone:
             user.phone_number = phone
             user.save()
+            Notifications.objects.create(
+                title="Profile Updated",
+                description=f"""Phone number updated to {phone}""",
+                user=user
+            )  
         if email:
             user.email = email
             user.save()
+            Notifications.objects.create(
+                title="Profile Updated",
+                description=f"""Email updated to {email}""",
+                user=user
+            )  
         return Response({'message': 'profile updated'}, status=status.HTTP_200_OK)
     
     def delete(self, request, pk):

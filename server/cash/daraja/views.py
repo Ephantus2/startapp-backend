@@ -20,7 +20,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.models import Activate, Transactions
 
 from django.contrib.auth.models import User
-
+from accounts.models import Notifications
 
 
 class STKPushView(APIView):
@@ -253,7 +253,12 @@ class MpesaCallbackView(APIView):
                     amount = 200,
                     status = 'completed'
                     )
-                    print("hello from jeff")
+    
+                    Notifications.objects.create(
+                        title="Referral Activated",
+                        description=f"""{user} Activate. KES {200} deposited to your account""",
+                        user=user.referred_by
+                    )  
                     
                 Transactions.objects.create(
                     user=user,
@@ -262,6 +267,12 @@ class MpesaCallbackView(APIView):
                     amount = amount,
                     status = 'completed'
                 )
+                
+            Notifications.objects.create(
+                title="Account activated",
+                description=f"""Account Activeted. Explore tasks and invite friends to earn!""",
+                user=user
+            )  
             return Response(
                 {"message": "Callback received",
                  "status": "Activated"
@@ -486,6 +497,11 @@ class B2CCallbackView(APIView):
                     amount=withdrawal.amount,
                     status="completed"
                 )
+                Notifications.objects.create(
+                    title="Withdrawal Approved",
+                    description=f"""KSH {withdrawal.amount} sent to {withdrawal.phone_number}""",
+                    user=user
+                )  
 
             else:
                 withdrawal.status = "failed"

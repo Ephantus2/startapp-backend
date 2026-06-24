@@ -6,6 +6,7 @@ from rest_framework import status
 from .models import Task, CompletedTask
 from .serializers import TaskSerializer, CompletedSerializer, TransactionSerializer
 from accounts.models import Transactions
+from accounts.models import Notifications
 
 class TaskListView(APIView):
 
@@ -63,6 +64,11 @@ class CompleteTaskView(APIView):
             amount = task.reward_points,
             status = 'completed'
                 )
+        Notifications.objects.create(
+            title="Task Completed",
+            description=f"""You earned {task.reward_points} from {task.title}""",
+            user=request.user
+        )  
 
         request.user.points += task.reward_points
         request.user.user_wallet += task.reward_points
