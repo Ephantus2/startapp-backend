@@ -14,6 +14,7 @@ from accounts.models import Transactions
 from accounts.models import Notifications
 
 
+
 class STKPushView(APIView):
     """
     Initiate STK Push
@@ -45,12 +46,12 @@ class STKPushView(APIView):
                 )
 
             # 2️⃣ M-Pesa Config (Use environment variables in production)
-            business_shortcode = "174379"
-            passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-            consumer_key = "eSQFZduKSQDj680euPXR4huvjcpfYJkWsbAK6T4dOAVsTNA8"
-            consumer_secret = "pBPwGPOxtmB9fvu8vhc1Y4slVZAuG5ROgKPys9GrhKLcw9iGGcs77xpFJYLRM3nM"
+            business_shortcode = settings.MPESA_STK_SHORTCODE
+            passkey = settings.MPESA_PASSKEY
+            consumer_key = settings.MPESA_CONSUMER_KEY
+            consumer_secret = settings.MPESA_CONSUMER_SECRET
 
-            callback_url = "https://carmelia-hyperscholastic-uneugenically.ngrok-free.dev/mpesa/callback/"
+            callback_url = settings.MPESA_CALLBACK_URL
 
             # 3️⃣ Generate Timestamp
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -281,7 +282,7 @@ class MpesaCallbackView(APIView):
             )
             
             
-from django.conf import settings
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Withdrawal, B2CCallbackLog
 
@@ -366,8 +367,7 @@ class WithdrawView(APIView):
             "Amount":
                 amount,
         
-            "PartyA": "600986",
-                #settings.MPESA_B2C_SHORTCODE,
+            "PartyA": settings.MPESA_B2C_SHORTCODE,
         
             "PartyB": "600000",
                 #settings.MPESA_B2C_PARTY_B,

@@ -196,6 +196,9 @@ MPESA_TIMEOUT_URL = os.getenv(
 MPESA_B2C_CALLBACK_URL = os.getenv(
     "MPESA_B2C_CALLBACK_URL"
 )
+MPESA_CALLBACK_URL = os.getenv(
+    "MPESA_CALLBACK_URL"
+)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=59),
