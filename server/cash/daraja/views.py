@@ -480,32 +480,35 @@ class B2CCallbackView(APIView):
             if result_code == 0:
 
                 user = withdrawal.user
+                if user.activated:
+                    # update wallet
+                    user.user_wallet -= withdrawal.amount
+                    user.save()
 
-                # update wallet
-                user.user_wallet -= withdrawal.amount
-                user.save()
+                    # log callback safely
+                    B2CCallbackLog.objects.create(
+                        payload=request.data
+                    )
 
-                # log callback safely
-                B2CCallbackLog.objects.create(
-                    payload=request.data
-                )
+                    # update withdrawal
+                    withdrawal.status = "completed"
 
-                # update withdrawal
-                withdrawal.status = "completed"
-
-                Transactions.objects.create(
-                    user=withdrawal.user,
-                    description=f"Withdrawn KES {withdrawal.amount} to {withdrawal.phone_number}",
-                    task_type="withdraw",
-                    amount=withdrawal.amount,
-                    status="completed"
-                )
-                Notifications.objects.create(
-                    title="Withdrawal Approved",
-                    notif_types="withdrawal",
-                    description=f"""KSH {withdrawal.amount} sent to {withdrawal.phone_number}""",
-                    user=user
-                )  
+                    Transactions.objects.create(
+                        user=withdrawal.user,
+                        description=f"Withdrawn KES {withdrawal.amount} to {withdrawal.phone_number}",
+                        task_type="withdraw",
+                        amount=withdrawal.amount,
+                        status="completed"
+                    )
+                    Notifications.objects.create(
+                        title="Withdrawal Approved",
+                        notif_types="withdrawal",
+                        description=f"""KSH {withdrawal.amount} sent to {withdrawal.phone_number}""",
+                        user=user
+                    )
+                
+                else:
+                    return Response("Activate account to continue")
 
             else:
                 withdrawal.status = "failed"
