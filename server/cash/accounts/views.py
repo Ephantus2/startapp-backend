@@ -136,15 +136,16 @@ class ProfileView(APIView):
 
     def get(self, request):
         user = request.user
-
-        return Response({
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'points': user.points,
-            'referral_code': user.referral_code,
-            'referral_link': f"http://localhost:8080/register?ref={user.referral_code}"
-        })
+        if user.activated:
+            return Response({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'points': user.points,
+                'referral_code': user.referral_code,
+                'referral_link': f"http://localhost:8080/register?ref={user.referral_code}"
+            })
+        return Response("Activate account to continue")
 
 
 class ReferralHistoryView(APIView):
