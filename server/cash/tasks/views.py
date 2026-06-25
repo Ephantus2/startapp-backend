@@ -13,17 +13,18 @@ class TaskListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        if request.user.activated:
+            tasks = Task.objects.filter(
+                is_active=True
+            )
 
-        tasks = Task.objects.filter(
-            is_active=True
-        )
+            serializer = TaskSerializer(
+                tasks,
+                many=True
+            )
 
-        serializer = TaskSerializer(
-            tasks,
-            many=True
-        )
-
-        return Response(serializer.data)
+            return Response(serializer.data)
+        return Response("Activate account to continue")
     
 class CompleteTaskView(APIView):
 
