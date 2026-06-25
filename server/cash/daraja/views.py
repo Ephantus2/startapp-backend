@@ -2,24 +2,15 @@
 
 import base64
 import requests
-import os
 from datetime import datetime
-
 from django.conf import settings
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
-
 from .models import MpesaPayment
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
-from accounts.models import Activate, Transactions
-
-from django.contrib.auth.models import User
+from accounts.models import Transactions
 from accounts.models import Notifications
 
 
@@ -235,8 +226,8 @@ class MpesaCallbackView(APIView):
                 print("hello from callback")
             
                 # 💰 wallet update
-                user.user_wallet += 500
-                user.life_term_earning += 500
+                #user.user_wallet += 500
+                #user.life_term_earning += 500
                 user.activated = True
                 user.save()
             
@@ -290,16 +281,8 @@ class MpesaCallbackView(APIView):
             )
             
             
-import base64
-import requests
-
 from django.conf import settings
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
-
 from .models import Withdrawal, B2CCallbackLog
 
 def get_access_token():
@@ -342,7 +325,6 @@ class WithdrawView(APIView):
         phone = request.data.get("phone")
 
         user = request.user
-        print(phone, amount)
 
         if amount < 100:
             return Response(
