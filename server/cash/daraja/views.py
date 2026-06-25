@@ -237,6 +237,7 @@ class MpesaCallbackView(APIView):
                 # 💰 wallet update
                 user.user_wallet += 500
                 user.life_term_earning += 500
+                user.activated = True
                 user.save()
             
                 if hasattr(user, "referred_by") and user.referred_by:
