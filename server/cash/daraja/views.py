@@ -369,7 +369,7 @@ class WithdrawView(APIView):
         
             "PartyA": settings.MPESA_B2C_SHORTCODE,
         
-            "PartyB": "600000",
+            "PartyB": "254708374149",
                 #settings.MPESA_B2C_PARTY_B,
         
             "Remarks":
