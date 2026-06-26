@@ -25,6 +25,9 @@ def get_token_for_user(user):
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
+        print("CONTENT TYPE:", request.content_type)
+        print("DATA:", request.data)
+        print("METHOD:", request.method)
 
         if serializer.is_valid():
             user = serializer.save()
