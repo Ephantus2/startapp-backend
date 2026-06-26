@@ -23,3 +23,8 @@ RUN pip install --upgrade pip --timeout 120 --retries 10 && \
 COPY . .
 
 EXPOSE 8000
+
+# Make the entrypoint executable
+RUN chmod +x docker-entrypoint.sh
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
