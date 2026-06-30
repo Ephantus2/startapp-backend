@@ -95,7 +95,7 @@ class LoginView(APIView):
                     'referral_code': user.referral_code,
                     'points': user.points,
                     'user_wallet': user.user_wallet,
-                    'referral_link': f"http://localhost:8080/register?ref={user.referral_code}",
+                    'referral_link': f"https://earn-share.pages.dev/register?ref={user.referral_code}",
                     'from_referrals': user.from_referrals,
                     'life_term_earning': user.life_time_earning,
                     'phone_number': user.phone_number
