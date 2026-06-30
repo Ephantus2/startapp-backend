@@ -47,7 +47,7 @@ class RegisterView(APIView):
                     title="Referral Joined",
                     notif_types="referral",
                     description=f"""{user} joined. You'll earn KES 200 once they are activated""",
-                    user=user
+                    user=user.referred_by
                 )  
             
             Notifications.objects.create(
@@ -60,7 +60,7 @@ class RegisterView(APIView):
 
             return Response(
                 {
-                    'message': 'user created successfully',
+                    'message': 'Account created successfully, please login',
                     'referral_code': user.referral_code
                 },
                 status=status.HTTP_201_CREATED
