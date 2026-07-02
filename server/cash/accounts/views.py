@@ -98,7 +98,8 @@ class LoginView(APIView):
                     'referral_link': f"https://earn-share.pages.dev/register?ref={user.referral_code}",
                     'from_referrals': user.from_referrals,
                     'life_term_earning': user.life_time_earning,
-                    'phone_number': user.phone_number
+                    'phone_number': user.phone_number,
+                    'activated': user.activated
                 }
             )
 
@@ -139,16 +140,15 @@ class ProfileView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.activated:
-            return Response({
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'points': user.points,
-                'referral_code': user.referral_code,
-                'referral_link': f"http://localhost:8080/register?ref={user.referral_code}"
-            })
-        return Response("Activate account to continue")
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'points': user.points,
+            'referral_code': user.referral_code,
+            'referral_link': f"http://localhost:8080/register?ref={user.referral_code}"
+        })
+        
 
 
 class ReferralHistoryView(APIView):
