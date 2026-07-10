@@ -24,6 +24,7 @@ class STKPushView(APIView):
 
         try:
             # 1️⃣ Validate input
+            print(request.data)
             phone_number = request.data.get("number")
             amount = request.data.get("amount")
 

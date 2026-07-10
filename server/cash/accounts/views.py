@@ -8,8 +8,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer, ReferralSerializer, NotificationSerializer
-from .models import User, ReferralReward, Wallet, Activate, Notifications
-from rest_framework import generics
+from .models import User, ReferralReward, Notifications
 
 
 
@@ -88,7 +87,6 @@ class LoginView(APIView):
             response = Response(
                 {
                     'message': 'logged in successfully',
-                    'user_id': user.id,
                     'user_name': user.username,
                     'date_joined': user.date_joined,
                     'email': user.email,
@@ -141,12 +139,18 @@ class ProfileView(APIView):
     def get(self, request):
         user = request.user
         return Response({
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'points': user.points,
-            'referral_code': user.referral_code,
-            'referral_link': f"http://localhost:8080/register?ref={user.referral_code}"
+                    'message': 'logged in successfully',
+                    'user_name': user.username,
+                    'date_joined': user.date_joined,
+                    'email': user.email,
+                    'referral_code': user.referral_code,
+                    'points': user.points,
+                    'user_wallet': user.user_wallet,
+                    'referral_link': f"https://earn-share.pages.dev/register?ref={user.referral_code}",
+                    'from_referrals': user.from_referrals,
+                    'life_term_earning': user.life_time_earning,
+                    'phone_number': user.phone_number,
+                    'activated': user.activated
         })
         
 
