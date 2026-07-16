@@ -6,6 +6,11 @@ import uuid
 
 from django.conf import settings
 
+#imports fo resetting password
+from django.utils import timezone
+from datetime import timedelta
+import random
+
 
 class User(AbstractUser):
     referral_code = models.CharField(max_length=12, unique=True, blank=True)
@@ -93,14 +98,7 @@ class Transactions(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
-class Wallet(models.Model):
-    balance = models.IntegerField(default=0)
-    last_updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     
-class Activate(models.Model):
-    activated = models.BooleanField(default=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     
 class Notifications(models.Model):
     NOTIF_TYPES = (
@@ -120,3 +118,35 @@ class Notifications(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="password_reset_otps"
+    )
+
+    otp = models.CharField(max_length=6)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    expires_at = models.DateTimeField()
+
+    is_verified = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp}"
+
+    @staticmethod
+    def generate_otp():
+        return str(random.randint(100000, 999999))
+
+    @staticmethod
+    def expiry_time():
+        return timezone.now() + timedelta(minutes=10)
+
+    def has_expired(self):
+        return timezone.now() > self.expires_at
