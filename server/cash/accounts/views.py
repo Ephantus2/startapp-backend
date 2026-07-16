@@ -35,6 +35,10 @@ def get_token_for_user(user):
     }
 
 
+@method_decorator(
+    ratelimit(key='ip', rate='3/m', block=True),
+    name='post'
+)
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -151,6 +155,10 @@ class LogoutView(APIView):
         return response
 
 
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='post'
+)
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -173,6 +181,10 @@ class ProfileView(APIView):
         
 
 
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='post'
+)
 class ReferralHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
