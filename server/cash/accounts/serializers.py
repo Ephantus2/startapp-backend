@@ -224,7 +224,8 @@ class ResetPasswordSerializer(serializers.Serializer):
 
         otp = PasswordResetOTP.objects.filter(
             user=user,
-            otp=attrs["otp"]
+            otp=attrs["otp"],
+            is_verified=True
         ).first()
 
         if not otp:
