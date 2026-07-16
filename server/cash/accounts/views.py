@@ -19,6 +19,11 @@ from .serializers import (
 
 from .emails import send_password_reset_otp
 
+#rate limit imports
+
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
+
 
 
 def get_token_for_user(user):
@@ -80,6 +85,10 @@ class RegisterView(APIView):
         )
 
 
+@method_decorator(
+    ratelimit(key='ip', rate='5/m', block=True),
+    name='post'
+)
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
