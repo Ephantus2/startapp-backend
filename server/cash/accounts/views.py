@@ -157,7 +157,7 @@ class LogoutView(APIView):
 
 @method_decorator(
     ratelimit(key='user', rate='10/m', block=True),
-    name='post'
+    name='get'
 )
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -183,7 +183,7 @@ class ProfileView(APIView):
 
 @method_decorator(
     ratelimit(key='user', rate='10/m', block=True),
-    name='post'
+    name='get'
 )
 class ReferralHistoryView(APIView):
     permission_classes = [IsAuthenticated]
