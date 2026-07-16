@@ -10,6 +10,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer, ReferralSerializer, NotificationSerializer
 from .models import User, ReferralReward, Notifications
 
+#reset password imports
+from .serializers import (
+    ForgotPasswordSerializer,
+    VerifyOTPSerializer,
+    ResetPasswordSerializer,
+)
+
+from .emails import send_password_reset_otp
+
 
 
 def get_token_for_user(user):
@@ -265,4 +274,89 @@ class NotificationsView(APIView):
     def post(self, request):
         Notification =  Notifications.objects.filter(user=request.user)
         Notification.update(read=True)
+        
+#reset password
+class ForgotPasswordView(APIView):
+
+    def post(self, request):
+
+        serializer = ForgotPasswordSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            email = serializer.validated_data["email"]
+
+            user = User.objects.get(email=email)
+
+            send_password_reset_otp(user)
+
+            return Response(
+                {
+                    "message":
+                    "OTP sent successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+class VerifyResetOTPView(APIView):
+
+    def post(self, request):
+
+        serializer = VerifyOTPSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            otp = serializer.validated_data[
+                "reset_otp"
+            ]
+
+            otp.is_verified = True
+            otp.save()
+
+            return Response(
+                {
+                    "message":
+                    "OTP verified successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+class ResetPasswordView(APIView):
+
+    def post(self, request):
+
+        serializer = ResetPasswordSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                {
+                    "message":
+                    "Password reset successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
