@@ -8,21 +8,28 @@ from .serializers import TaskSerializer, CompletedSerializer, TransactionSeriali
 from accounts.models import Transactions
 from accounts.models import Notifications
 
+#cache import
+from django.core.cache import cache
+
 class TaskListView(APIView):
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        data = cache.get("tasks")
         
-        tasks = Task.objects.filter(
-            is_active=True
-        )
-        serializer = TaskSerializer(
-            tasks,
-            many=True
-        )
+        if data is None:
+            tasks = Task.objects.filter(
+                is_active=True
+            )
+            serializer = TaskSerializer(
+                tasks,
+                many=True
+            )
+            data = serializer.data
+            cache.set("tasks", data, timeout=300)
 
-        return Response(serializer.data)
+        return Response(data)
     
 class CompleteTaskView(APIView):
 
