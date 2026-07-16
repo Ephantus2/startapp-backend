@@ -236,3 +236,15 @@ EMAIL_HOST_USER = 'ephantusmwago6@gmail.com'
 EMAIL_HOST_PASSWORD = 'cciw yczy svsd dszf'
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{os.getenv('REDIS_HOST')}:{os.getenv('REDIS_PORT')}/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "earnke",
+        "TIMEOUT": 300,
+    }
+}

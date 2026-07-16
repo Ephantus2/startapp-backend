@@ -29,3 +29,6 @@ gunicorn==23.0.0
 python-dotenv==1.1.1
 djangorestframework-simplejwt==5.5.0
 requests==2.32.4
+redis==6.4.0
+django-redis==6.0.0
+django-ratelimit==4.1.0
