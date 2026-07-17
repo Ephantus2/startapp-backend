@@ -81,6 +81,7 @@ class CompleteTaskView(APIView):
         request.user.user_wallet += task.reward_points
         request.user.save()
         cache.delete("completed")
+        cache.delete("transaction")
         
 
         return Response({
@@ -98,7 +99,7 @@ class CompleteTaskView(APIView):
 
             serializers = CompletedSerializer(completed, many=True)
             data = serializers.data
-            cache.set('completed', data, timeout=300)
+            cache.set('completed', data, timeout=3000)
         
         return Response(data, status=status.HTTP_200_OK)
     
@@ -108,7 +109,11 @@ class TransactionsView(APIView):
     def get(self, request):
         
         user = request.user
-        transactions = Transactions.objects.filter(user=user)
-        serializers = TransactionSerializer(transactions, many=True)
+        data = cache.get("data")
+        if data is None:
+            transactions = Transactions.objects.filter(user=user)
+            serializers = TransactionSerializer(transactions, many=True)
+            data = serializers.data
+            cache.set("transaction", data, timeout=3000)
         
         return Response(serializers.data, status=status.HTTP_200_OK)     
