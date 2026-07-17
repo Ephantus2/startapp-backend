@@ -10,6 +10,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer, ReferralSerializer, NotificationSerializer
 from .models import User, ReferralReward, Notifications
 
+from django.core.cache import cache
+
 #reset password imports
 from .serializers import (
     ForgotPasswordSerializer,
@@ -54,6 +56,7 @@ class RegisterView(APIView):
                 user.referred_by.points += 100
                 user.referred_by.user_wallet += 200
                 user.referred_by.save()
+                cache.delete("referrals")
 
                 ReferralReward.objects.create(
                     referrer=user.referred_by,
@@ -189,9 +192,12 @@ class ReferralHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        rewards = ReferralReward.objects.filter(
-            referrer=request.user
-        ).order_by('-created_at')
+        rewards = cache.get('rewards')
+        if rewards is None: 
+            rewards = ReferralReward.objects.filter(
+                referrer=request.user
+            ).order_by('-created_at')
+            cache.set("rewards", rewards, timeout=300)
 
         data = []
 
@@ -208,8 +214,10 @@ class MyReferralsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        referrals = request.user.people_referred.all()
-        print(referrals)
+        referrals = cache.get("referrals")
+        if referrals is None:
+            referrals = request.user.people_referred.all()
+            cache.set("referrals", referrals, timeout=3000)
 
         serializer = ReferralSerializer(
             referrals,
