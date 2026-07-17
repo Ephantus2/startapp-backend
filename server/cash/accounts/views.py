@@ -167,20 +167,24 @@ class ProfileView(APIView):
 
     def get(self, request):
         user = request.user
-        return Response({
-                    'message': 'logged in successfully',
-                    'user_name': user.username,
-                    'date_joined': user.date_joined,
-                    'email': user.email,
-                    'referral_code': user.referral_code,
-                    'points': user.points,
-                    'user_wallet': user.user_wallet,
-                    'referral_link': f"https://earn-share.pages.dev/register?ref={user.referral_code}",
-                    'from_referrals': user.from_referrals,
-                    'life_term_earning': user.life_time_earning,
-                    'phone_number': user.phone_number,
-                    'activated': user.activated
-        })
+        data = cache.get("profile")
+        if data is None:
+            data = {
+                        'message': 'logged in successfully',
+                        'user_name': user.username,
+                        'date_joined': user.date_joined,
+                        'email': user.email,
+                        'referral_code': user.referral_code,
+                        'points': user.points,
+                        'user_wallet': user.user_wallet,
+                        'referral_link': f"https://earn-share.pages.dev/register?ref={user.referral_code}",
+                        'from_referrals': user.from_referrals,
+                        'life_term_earning': user.life_time_earning,
+                        'phone_number': user.phone_number,
+                        'activated': user.activated
+            }
+            cache.set("profile", data, timeout=300)
+        return Response(data)
         
 
 
