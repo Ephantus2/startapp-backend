@@ -12,6 +12,7 @@ from .models import MpesaPayment
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.models import Transactions
 from accounts.models import Notifications
+from django.core.cache import cache
 
 
 
@@ -489,6 +490,8 @@ class B2CCallbackView(APIView):
                         description=f"""KSH {withdrawal.amount} sent to {withdrawal.phone_number}""",
                         user=user
                     )
+                    cache.delete("notifications")
+                    cache.delete("transaction")
                 
                 else:
                     return Response("Activate account to continue")
