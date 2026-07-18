@@ -82,6 +82,7 @@ class CompleteTaskView(APIView):
         request.user.save()
         cache.delete("completed")
         cache.delete("transaction")
+        cache.delete("notifications")
         
 
         return Response({

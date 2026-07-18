@@ -57,6 +57,7 @@ class RegisterView(APIView):
                 user.referred_by.user_wallet += 200
                 user.referred_by.save()
                 cache.delete("referrals")
+                cache.delete("notifications")
 
                 ReferralReward.objects.create(
                     referrer=user.referred_by,
@@ -68,7 +69,8 @@ class RegisterView(APIView):
                     notif_types="referral",
                     description=f"""{user} joined. You'll earn KES 200 once they are activated""",
                     user=user.referred_by
-                )  
+                ) 
+            cache.delete("notifications") 
             
             Notifications.objects.create(
                 title="Welcome to EarnKE",
