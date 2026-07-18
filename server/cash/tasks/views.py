@@ -11,6 +11,9 @@ from accounts.models import Notifications
 #cache import
 from django.core.cache import cache
 
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
+
 class TaskListView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -34,7 +37,8 @@ class TaskListView(APIView):
 class CompleteTaskView(APIView):
 
     permission_classes = [IsAuthenticated]
-
+    @method_decorator(
+    ratelimit(key='user', rate='5/m', block=True))
     def post(self, request):
 
         task_id = request.data.get('task_id')
@@ -90,9 +94,9 @@ class CompleteTaskView(APIView):
             "earned_points": task.reward_points,
             "total_points": request.user.points,
         })
-    
+    @method_decorator(
+    ratelimit(key='user', rate='10/m', block=True))
     def get(self, request):
-        
         user = request.user
         data = cache.get("completed")
         if data is None:
@@ -104,7 +108,10 @@ class CompleteTaskView(APIView):
         
         return Response(data, status=status.HTTP_200_OK)
     
-    
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='get'
+)    
 class TransactionsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
