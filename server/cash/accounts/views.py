@@ -216,6 +216,10 @@ class ReferralHistoryView(APIView):
 
         return Response(data)
     
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='get'
+)
 class MyReferralsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -239,7 +243,9 @@ class MyReferralsView(APIView):
 from django.contrib.auth import update_session_auth_hash
 class UpdateProfile(APIView):
     permission_classes=[IsAuthenticated]
-    
+    @method_decorator(
+    ratelimit(key='user', rate='5/m', block=True)
+    )
     def put(self, request, pk):
         try:
             user = User.objects.get(id=request.user.id)
@@ -254,6 +260,7 @@ class UpdateProfile(APIView):
         if username:
             user.username = username
             user.save()
+            cache.delete("notifications")
             Notifications.objects.create(
                 title="Profile Updated",
                 notif_types="system",
@@ -263,6 +270,7 @@ class UpdateProfile(APIView):
         if password:
             user.set_password(password)
             user.save()
+            cache.delete("notifications")
             Notifications.objects.create(
                 title="Profile Updated",
                 notif_types="system",
@@ -273,6 +281,7 @@ class UpdateProfile(APIView):
         if phone:
             user.phone_number = phone
             user.save()
+            cache.delete("notifications")
             Notifications.objects.create(
                 title="Profile Updated",
                 notif_types="system",
@@ -282,6 +291,7 @@ class UpdateProfile(APIView):
         if email:
             user.email = email
             user.save()
+            cache.delete("notifications")
             Notifications.objects.create(
                 title="Profile Updated",
                 notif_types="system",
@@ -289,11 +299,13 @@ class UpdateProfile(APIView):
                 user=user
             )  
         return Response({'message': 'profile updated'}, status=status.HTTP_200_OK)
-    
+    @method_decorator(
+    ratelimit(key='user', rate='5/m', block=True),
+    name='get')
     def delete(self, request, pk):
         try:
             print(request.user)
-            user = User.objects.get(email=request.user.email)
+            user = User.objects.get(id=request.user.id)
         except User.DoesNotExist():
             return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -301,6 +313,9 @@ class UpdateProfile(APIView):
         return Response({'message': 'user deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     
 class NotificationsView(APIView):
+    @method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='get')
     def get(self, request):
         data = cache.get("notifications")
         if data is None:
@@ -315,6 +330,10 @@ class NotificationsView(APIView):
         cache.delete("notifications")
         
 #reset password
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='post'
+)
 class ForgotPasswordView(APIView):
 
     def post(self, request):
@@ -343,7 +362,11 @@ class ForgotPasswordView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-        
+
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='post'
+)        
 class VerifyResetOTPView(APIView):
 
     def post(self, request):
@@ -373,7 +396,11 @@ class VerifyResetOTPView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-        
+
+@method_decorator(
+    ratelimit(key='user', rate='10/m', block=True),
+    name='post'
+)        
 class ResetPasswordView(APIView):
 
     def post(self, request):
