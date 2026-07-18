@@ -300,13 +300,17 @@ class UpdateProfile(APIView):
     
 class NotificationsView(APIView):
     def get(self, request):
-        Notification = Notifications.objects.filter(user=request.user)
-        serializers = NotificationSerializer(Notification, many=True)
+        data = cache.get("notifications")
+        if data is None:
+            Notification = Notifications.objects.filter(user=request.user)
+            serializers = NotificationSerializer(Notification, many=True)
+            data = cache.set("notifications", data, timeout=600)
         return Response(serializers.data, status=status.HTTP_200_OK)
     
     def post(self, request):
         Notification =  Notifications.objects.filter(user=request.user)
         Notification.update(read=True)
+        cache.delete("notifications")
         
 #reset password
 class ForgotPasswordView(APIView):
