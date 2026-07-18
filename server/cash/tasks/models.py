@@ -28,7 +28,7 @@ class Task(models.Model):
 
     required_seconds = models.IntegerField(default=30)
 
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, db_index=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
