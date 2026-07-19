@@ -1,31 +1,18 @@
 # accounts/views.py
-
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from .serializers import UserSerializer, ReferralSerializer, NotificationSerializer
+from .serializers import UserSerializer, ReferralSerializer, NotificationSerializer, ForgotPasswordSerializer,VerifyOTPSerializer,ResetPasswordSerializer
 from .models import User, ReferralReward, Notifications
-
 from django.core.cache import cache
-
 #reset password imports
-from .serializers import (
-    ForgotPasswordSerializer,
-    VerifyOTPSerializer,
-    ResetPasswordSerializer,
-)
-
 from .emails import send_password_reset_otp
-
 #rate limit imports
-
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
-
 
 
 def get_token_for_user(user):
@@ -35,7 +22,6 @@ def get_token_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token)
     }
-
 
 @method_decorator(
     ratelimit(key='ip', rate='3/m', block=True),
