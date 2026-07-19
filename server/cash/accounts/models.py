@@ -26,7 +26,7 @@ class User(AbstractUser):
     from_referrals = models.IntegerField(default=0)
     life_time_earning = models.IntegerField(default=0)
     phone_number = models.CharField(default="0712345678", max_length=15)
-    activated = models.BooleanField(default=True)
+    activated = models.BooleanField(default=False)
     
 
     def save(self, *args, **kwargs):
