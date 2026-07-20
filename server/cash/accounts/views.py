@@ -147,7 +147,7 @@ class LogoutView(APIView):
 
 
 @method_decorator(
-    ratelimit(key='user', rate='10/m', block=True),
+    ratelimit(key='user', rate='100/m', block=True),
     name='get'
 )
 class ProfileView(APIView):
@@ -230,7 +230,7 @@ from django.contrib.auth import update_session_auth_hash
 class UpdateProfile(APIView):
     permission_classes=[IsAuthenticated]
     @method_decorator(
-    ratelimit(key='user', rate='60/m', block=True)
+    ratelimit(key='user', rate='5/m', block=True)
     )
     def put(self, request, pk):
         try:
